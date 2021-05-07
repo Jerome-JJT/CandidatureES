@@ -1,4 +1,12 @@
 <script>
+  let localHour = NaN;
+  //TODO, remove for production
+  function SetTime(date)
+  {
+    let localTime = new Date(date);
+    localHour = localTime.getHours();
+  }
+
   //Avoid 3.4-1.6 = 1.79999999999
   function javascriptRound(num)
   {
@@ -16,6 +24,8 @@
       this.balance = 0;
       //Store money from sold items
       this.fund = 0;
+
+      this.logs = [];
     }
 
     //Add money to thet balance
@@ -41,6 +51,17 @@
             //Reduce balance and increase fund with item price
             this.balance = javascriptRound(this.balance - this.stock[code].item.price);
             this.fund = javascriptRound(this.fund + this.stock[code].item.price);
+
+            let useHour = (localHour == NaN) ? (new Date).getHours() : localHour;
+
+            if(this.logs[useHour] !== undefined)
+            {
+              this.logs[useHour] = javascriptRound(this.logs[useHour]+this.stock[code].item.price);
+            }
+            else
+            {
+              this.logs[useHour] = this.stock[code].item.price;
+            }
 
             return "Vending "+this.stock[code].item.name;
           }
@@ -71,6 +92,12 @@
     {
       return this.fund;
     }
+
+    GetLogs()
+    {
+      let display = this.logs.sort().reverse();
+      console.log(display);
+    }
   }
 
   //Store an item's name and price
@@ -93,8 +120,18 @@
   machine1 = new VendingMachine(newStock);
 
 
+  //Test machine extension
+  newStock = [];
+  newStock["A01"] = {"item": new Item("Smarties", 1.6), "qty": 100};
+  newStock["A02"] = {"item": new Item("Carampar", 0.6), "qty": 50};
+  newStock["A03"] = {"item": new Item("Avril", 2.1), "qty": 20};
+  newStock["A04"] = {"item": new Item("KokoKola", 2.95), "qty": 10};
+
+  machineExtension = new VendingMachine(newStock);
+
+
   //Tests cases
-  switch(-1)
+  switch(10)
   {
     case 0:
     machine1.Insert(3.40);
@@ -143,6 +180,18 @@
     console.log(machine1.Choose("A02"));
     console.log(machine1.GetChange());
     console.log(machine1.GetBalance());
+    break;
+
+    //Extension test case
+    case 10:
+    machineExtension.Insert(1000.00);
+    SetTime("2020-01-01T20:30:00"); machineExtension.Choose("A01");
+    SetTime("2020-03-01T23:30:00"); machineExtension.Choose("A01");
+    SetTime("2020-03-04T09:22:00"); machineExtension.Choose("A01");
+    SetTime("2020-04-01T23:00:00"); machineExtension.Choose("A01");
+    SetTime("2020-04-01T23:59:59"); machineExtension.Choose("A01");
+    SetTime("2020-04-04T09:12:00"); machineExtension.Choose("A01");
+    machineExtension.GetLogs();
     break;
   }
 
