@@ -21,3 +21,7 @@ selecta = new VendingMachine(stock);
 Les exemples et cas tests se trouvent dans le fichier index.html, 
 par défaut aucun test n'est activé, 
 pour les tester il suffit de modifier la valeur du switch pour passer entre les cas tests.
+
+Les cas entre 0 et 6 compris sont dédiés aux tests normaux, les cas entre 10 et 12 compris sont pour tester l'extension.
+
+Il est aussi possible de rajouter des tests.
