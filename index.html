@@ -1,5 +1,6 @@
 <script>
   let localHour = NaN;
+
   //TODO, remove for production
   function SetTime(date)
   {
@@ -52,15 +53,21 @@
             this.balance = javascriptRound(this.balance - this.stock[code].item.price);
             this.fund = javascriptRound(this.fund + this.stock[code].item.price);
 
-            let useHour = (localHour == NaN) ? (new Date).getHours() : localHour;
+            //Check if a custom hour is set
+            let useHour = isNaN(localHour) ? (new Date).getHours() : localHour;
 
-            if(this.logs[useHour] !== undefined)
+            //Get log entry for this hour, equal -1 if not exists
+            let hourIndex = this.logs.findIndex(function(val) {return val['hour'] == useHour});
+
+            //If this hour already has an log entry
+            if(hourIndex != -1)
             {
-              this.logs[useHour] = javascriptRound(this.logs[useHour]+this.stock[code].item.price);
+              this.logs[hourIndex]['amount'] = javascriptRound(this.logs[hourIndex]['amount'] + this.stock[code].item.price);
             }
+            //Else, create log entry
             else
             {
-              this.logs[useHour] = this.stock[code].item.price;
+              this.logs.push({hour: useHour, amount: this.stock[code].item.price});
             }
 
             return "Vending "+this.stock[code].item.name;
@@ -95,8 +102,12 @@
 
     GetLogs()
     {
-      let display = this.logs.sort().reverse();
-      console.log(display);
+      let display = this.logs;
+      display.sort(function(a, b) {return a['amount'] < b['amount']});
+      display = display.slice(0, 3);
+
+      display.forEach(function(val) {console.log("Hour " + val['hour'] + " generated a revenue of " + val['amount'])});
+      //console.log(display);
     }
   }
 
@@ -131,7 +142,7 @@
 
 
   //Tests cases
-  switch(10)
+  switch(-1)
   {
     case 0:
     machine1.Insert(3.40);
@@ -182,6 +193,7 @@
     console.log(machine1.GetBalance());
     break;
 
+
     //Extension test case
     case 10:
     machineExtension.Insert(1000.00);
@@ -191,6 +203,42 @@
     SetTime("2020-04-01T23:00:00"); machineExtension.Choose("A01");
     SetTime("2020-04-01T23:59:59"); machineExtension.Choose("A01");
     SetTime("2020-04-04T09:12:00"); machineExtension.Choose("A01");
+    machineExtension.GetLogs();
+    break;
+
+    case 11:
+    machineExtension.Insert(1000.00);
+    SetTime("2020-04-04T09:12:00"); machineExtension.Choose("A01");
+
+    SetTime("2020-04-04T12:12:00"); machineExtension.Choose("A01");
+    SetTime("2020-04-04T12:12:00"); machineExtension.Choose("A01");
+
+    SetTime("2020-01-01T20:30:00"); machineExtension.Choose("A01");
+    SetTime("2020-01-01T20:30:00"); machineExtension.Choose("A01");
+    SetTime("2020-01-01T20:30:00"); machineExtension.Choose("A01");
+
+    SetTime("2020-03-01T23:30:00");
+    machineExtension.Choose("A01");
+    machineExtension.Choose("A01");
+    machineExtension.Choose("A01");
+    machineExtension.Choose("A01");
+
+    machineExtension.GetLogs();
+    break;
+
+    case 12:
+    machineExtension.Insert(1000.00);
+
+    SetTime("2020-03-01T04:30:00"); machineExtension.Choose("A01");
+    SetTime("2020-03-01T04:30:00"); machineExtension.Choose("A01");
+    SetTime("2020-04-01T04:00:00"); machineExtension.Choose("A01");
+    SetTime("2020-04-01T04:59:59"); machineExtension.Choose("A01");
+
+    SetTime(""); //Use normal hour
+    machineExtension.Choose("A01");
+    machineExtension.Choose("A01");
+    machineExtension.Choose("A01");
+
     machineExtension.GetLogs();
     break;
   }
