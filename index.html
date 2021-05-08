@@ -1,124 +1,9 @@
+
+<script src="vending.js"></script>
+<script src="functions.js"></script>
+
 <script>
   let localHour = NaN;
-
-  //TODO, remove for production
-  function SetTime(date)
-  {
-    let localTime = new Date(date);
-    localHour = localTime.getHours();
-  }
-
-  //Avoid 3.4-1.6 = 1.79999999999
-  function javascriptRound(num)
-  {
-    return Math.round(num*100000000)/100000000;
-  }
-
-
-  //Store machine's stored items, balance and total funds
-  class VendingMachine
-  {
-    constructor(stock) {
-      this.stock = stock;
-
-      //Store current balance
-      this.balance = 0;
-      //Store money from sold items
-      this.fund = 0;
-
-      this.logs = [];
-    }
-
-    //Add money to thet balance
-    Insert(amount)
-    {
-      this.balance+=amount;
-    }
-
-    //Try to sell an item
-    Choose(code)
-    {
-      //Existing item verificatiom
-      if(this.stock[code] !== undefined)
-      {
-        //Enough quantity verification
-        if(this.stock[code].qty > 0)
-        {
-          //Enough balance for price verification
-          if(this.balance >= this.stock[code].item.price)
-          {
-            this.stock[code].qty -= 1;
-
-            //Reduce balance and increase fund with item price
-            this.balance = javascriptRound(this.balance - this.stock[code].item.price);
-            this.fund = javascriptRound(this.fund + this.stock[code].item.price);
-
-            //Check if a custom hour is set
-            let useHour = isNaN(localHour) ? (new Date).getHours() : localHour;
-
-            //Get log entry for this hour, equal -1 if not exists
-            let hourIndex = this.logs.findIndex(function(val) {return val['hour'] == useHour});
-
-            //If this hour already has an log entry
-            if(hourIndex != -1)
-            {
-              this.logs[hourIndex]['amount'] = javascriptRound(this.logs[hourIndex]['amount'] + this.stock[code].item.price);
-            }
-            //Else, create log entry
-            else
-            {
-              this.logs.push({hour: useHour, amount: this.stock[code].item.price});
-            }
-
-            return "Vending "+this.stock[code].item.name;
-          }
-          else
-          {
-            return "Not enough money!";
-          }
-        }
-        else
-        {
-          return "Item "+this.stock[code].item.name+": Out of stock!";
-        }
-      }
-      else
-      {
-        return "Invalid selection!";
-      }
-    }
-
-    //Return current balance
-    GetChange()
-    {
-      return this.balance;
-    }
-
-    //Return total price of sold items
-    GetBalance()
-    {
-      return this.fund;
-    }
-
-    GetLogs()
-    {
-      let display = this.logs;
-      display.sort(function(a, b) {return a['amount'] < b['amount']});
-      display = display.slice(0, 3);
-
-      display.forEach(function(val) {console.log("Hour " + val['hour'] + " generated a revenue of " + val['amount'])});
-      //console.log(display);
-    }
-  }
-
-  //Store an item's name and price
-  class Item
-  {
-    constructor(name, price) {
-      this.name = name;
-      this.price = price;
-    }
-  }
 
 
   //Test machine
@@ -144,24 +29,24 @@
   //Tests cases
   switch(-1)
   {
-    case 0:
+    case 0: //Normal test case
     machine1.Insert(3.40);
     console.log(machine1.Choose("A01"));
     console.log(machine1.GetChange());
     break;
 
     case 1:
-    machine1.Insert(2.10);
+    machine1.Insert(2.10); //Normal test case, print balance
     console.log(machine1.Choose("A03"));
     console.log(machine1.GetChange());
     console.log(machine1.GetBalance());
     break;
 
-    case 2:
+    case 2: //Not enough money test case
     console.log(machine1.Choose("A01"));
     break;
 
-    case 3:
+    case 3: //Not enough money, then buy test case
     machine1.Insert(1.00);
     console.log(machine1.Choose("A01"));
     console.log(machine1.GetChange());
@@ -169,19 +54,19 @@
     console.log(machine1.GetChange());
     break;
 
-    case 4:
+    case 4: //Invalid selection test case
     machine1.Insert(1.00);
     console.log(machine1.Choose("A05"));
     break;
 
-    case 5:
+    case 5: //Out of stock test case
     machine1.Insert(6.00);
     console.log(machine1.Choose("A04"));
     console.log(machine1.Choose("A04"));
     console.log(machine1.GetChange());
     break;
 
-    case 6:
+    case 6: //All functions test case
     machine1.Insert(6.00);
     console.log(machine1.Choose("A04"));
     machine1.Insert(6.00);
@@ -195,7 +80,7 @@
 
 
     //Extension test case
-    case 10:
+    case 10: //Normal logs test case
     machineExtension.Insert(1000.00);
     SetTime("2020-01-01T20:30:00"); machineExtension.Choose("A01");
     SetTime("2020-03-01T23:30:00"); machineExtension.Choose("A01");
@@ -206,7 +91,7 @@
     machineExtension.GetLogs();
     break;
 
-    case 11:
+    case 11: //More than 3 hours test case
     machineExtension.Insert(1000.00);
     SetTime("2020-04-04T09:12:00"); machineExtension.Choose("A01");
 
@@ -226,7 +111,7 @@
     machineExtension.GetLogs();
     break;
 
-    case 12:
+    case 12: //Without set hour test case
     machineExtension.Insert(1000.00);
 
     SetTime("2020-03-01T04:30:00"); machineExtension.Choose("A01");
